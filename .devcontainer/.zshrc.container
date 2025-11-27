@@ -10,6 +10,7 @@ compinit -C
 export GIT_EDITOR="vim"
 # Let git know that it is managing a lot of files
 git config feature.manyFiles true
+git config push.autoSetupRemote true
 git update-index --index-version 4
 
 # Set the theme
