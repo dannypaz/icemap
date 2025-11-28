@@ -1,0 +1,141 @@
+.pattern-selector {
+  background: linear-gradient(135deg, #1a2a3a 0%, #0d1820 100%);
+  border-radius: 12px;
+  padding: 24px;
+  color: #e0e8f0;
+  min-width: 280px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pattern-selector h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.selector-description {
+  margin: 0 0 20px 0;
+  font-size: 0.875rem;
+  color: #8a9bb0;
+  line-height: 1.4;
+}
+
+.pattern-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pattern-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.pattern-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.pattern-option.selected {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pattern-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #4a9eff;
+  cursor: pointer;
+}
+
+.color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.pattern-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pattern-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+}
+
+.pattern-description {
+  font-size: 0.8rem;
+  color: #7a8b9c;
+}
+
+.sidelines-option {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sideline-toggle {
+  background: rgba(100, 180, 255, 0.08);
+}
+
+.sideline-toggle:hover {
+  background: rgba(100, 180, 255, 0.15);
+}
+
+.sideline-toggle.selected {
+  background: rgba(100, 180, 255, 0.2);
+  border-color: rgba(100, 180, 255, 0.3);
+}
+
+.legend {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend h3 {
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #8a9bb0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.legend h3:not(:first-child) {
+  margin-top: 16px;
+}
+
+.legend ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.legend li {
+  font-size: 0.85rem;
+  color: #a0b0c0;
+}
+
+.legend li strong {
+  color: #c0d0e0;
+  font-weight: 500;
+}

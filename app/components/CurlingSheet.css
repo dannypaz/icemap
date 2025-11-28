@@ -1,0 +1,168 @@
+.curling-sheet-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.curling-sheet {
+  /* 14ft wide, showing ~28ft of length (house area + hog line) */
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 14 / 28;
+  background: linear-gradient(
+    180deg,
+    #e8f4f8 0%,
+    #ddeef5 25%,
+    #e8f4f8 50%,
+    #ddeef5 75%,
+    #e8f4f8 100%
+  );
+  border: 3px solid #2a4a5e;
+  border-radius: 6px;
+  position: relative;
+  box-shadow:
+    inset 0 0 60px rgba(200, 220, 235, 0.5),
+    0 8px 40px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.sheet-markings {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* House (rings) - centered horizontally, positioned from top */
+/* On 28ft visible length: house starts at ~4ft from top (14% down) */
+/* House is 12ft diameter = 42.8% of height */
+.house {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  /* 12ft diameter on 14ft sheet width = 85.7% of width */
+  width: 85.7%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  /* Position: top at 4ft from top of 28ft = 14.3% */
+  top: 14.3%;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.ring-12ft {
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 100, 200, 0.3);
+  border: 3px solid #1a5a8a;
+}
+
+.ring-8ft {
+  width: 66.67%;
+  height: 66.67%;
+  background: rgba(255, 255, 255, 0.8);
+  border: 3px solid #1a5a8a;
+}
+
+.ring-4ft {
+  width: 33.33%;
+  height: 33.33%;
+  background: rgba(200, 50, 50, 0.4);
+  border: 3px solid #8a1a1a;
+}
+
+.button {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 8%;
+  aspect-ratio: 1;
+  background: #fff;
+  border: 3px solid #333;
+  border-radius: 50%;
+}
+
+/* Back line - at top edge of 12ft ring */
+/* Position: 4ft from top = 14.3% */
+.back-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #1a5a8a;
+  top: 14.3%;
+}
+
+/* Tee line - through center of button */
+/* House center: top (14.3%) + half of house height (21.4%) = 35.7% */
+.tee-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #1a5a8a;
+  top: 35.7%;
+}
+
+/* Center line - vertical through middle of sheet */
+.center-line {
+  position: absolute;
+  left: 50%;
+  /* From back line to near bottom */
+  top: 14.3%;
+  bottom: 10%;
+  width: 3px;
+  background: #1a5a8a;
+  transform: translateX(-50%);
+}
+
+/* Hog line - thick red line below house */
+/* Position: after house ends (14.3% + 42.8% = 57.1%) + gap (~18%) = ~75% */
+.hog-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: #c41e3a;
+  top: 78%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Pattern layer */
+.pattern-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Width markers */
+.width-markers {
+  position: absolute;
+  bottom: -28px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #8a9bb0;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  padding: 0 2px;
+}
+
+.marker {
+  position: relative;
+}
+
+.marker-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}

@@ -1,0 +1,67 @@
+---
+description: Project-wide rules for the Curling Scrape Pattern Visualizer
+globs:
+---
+
+# Project Rules
+
+## Package Manager
+Always use `pnpm` (not npm or yarn).
+
+## Tech Stack
+- **Next.js 14** with App Router
+- **TypeScript** with strict mode
+- **Plain CSS** (co-located with components)
+- **Vercel** for deployment
+
+## Project Structure
+```
+/app
+  layout.tsx       - Root layout (Server Component)
+  page.tsx         - Home page (Server Component)
+  globals.css      - Global styles + app layout
+  /components      - All components here
+```
+
+## Component Patterns
+- Server Components by default
+- Add `'use client'` only for components using hooks or browser APIs
+- Interactive components: `CurlingVisualizer`, `PatternOverlay`, `PatternSelector`, `SidelinesOverlay`
+- Static components: `CurlingSheet`, `layout`, `page`
+
+## Curling Domain Knowledge
+- **Sheet dimensions**: 14ft wide × ~150ft long
+- **Scraper blade**: 5ft wide
+- **Hole terminology**: "1-hole" = ~2" past center, "2-hole" = ~8" past center
+- **Edge overlap**: Outside passes typically go ~3" past sheet edges
+- **Pass direction**: Alternates down/up, starting from middle and working outward
+- **Sidelines**: Optional 2.5ft passes on each side
+
+## Pattern Definition (PatternOverlay.tsx)
+Patterns are defined in `PATTERNS` object with:
+```ts
+{
+  color: 'rgba(r,g,b,0.2)',      // Fill color
+  borderColor: 'rgba(r,g,b,0.6)', // Border color
+  hoverColor: 'rgba(r,g,b,0.4)',  // Hover fill
+  lanes: [{ startFt, widthFt, direction }]
+}
+```
+Lane positions are in feet, converted to percentages for rendering.
+
+## Styling Conventions
+- Use CSS variables from globals.css: `--font-outfit`, `--font-jetbrains`
+- Dark theme: backgrounds `#0a1520` to `#162535`
+- Accent colors: blue `#60a5fa`, purple `#a78bfa`
+- Co-locate CSS files with components
+
+## Key Constants
+```ts
+SHEET_WIDTH_FT = 14
+SCRAPER_WIDTH_FT = 5
+CENTER_FT = 7
+ONE_HOLE_FT = 2/12  // 2 inches
+TWO_HOLE_FT = 8/12  // 8 inches
+EDGE_OVERLAP_FT = 3/12  // 3 inches
+SIDELINE_WIDTH_FT = 2.5
+```

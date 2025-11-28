@@ -1,0 +1,131 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: #0a1520;
+  color: #e0e8f0;
+  min-height: 100vh;
+  font-family: var(--font-outfit), -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a2a3a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a4a5a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4a5a6a;
+}
+
+/* App Layout */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  text-align: center;
+  padding: 24px 20px 20px;
+  background: linear-gradient(180deg, #0a1520 0%, #0f2030 100%);
+  border-bottom: 1px solid rgba(100, 150, 200, 0.2);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #60a5fa 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.03em;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 200% center; }
+}
+
+.app-header p {
+  margin: 6px 0 0;
+  color: #7a8fa5;
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  padding: 24px;
+  gap: 24px;
+  background: linear-gradient(180deg, #0f2030 0%, #162535 50%, #0f2030 100%);
+  min-height: 0;
+}
+
+.pattern-selector-wrapper {
+  flex: 1;
+  min-width: 280px;
+  max-width: 320px;
+}
+
+.sheet-wrapper {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 16px;
+  background: #0a1520;
+  border-top: 1px solid rgba(100, 150, 200, 0.15);
+}
+
+.app-footer p {
+  margin: 0;
+  color: #5a6a7a;
+  font-size: 0.85rem;
+}
+
+/* Responsive layout */
+@media (max-width: 900px) {
+  .app-main {
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .pattern-selector-wrapper {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .app-header h1 {
+    font-size: 1.4rem;
+  }
+}
