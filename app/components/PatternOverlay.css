@@ -16,6 +16,10 @@
   z-index: 100;
 }
 
+.scrape-lane.preview {
+  /* No animation - just static display */
+}
+
 .scrape-lane::before {
   content: '';
   position: absolute;
@@ -35,6 +39,10 @@
     inset -4px 0 8px rgba(0, 0, 0, 0.15);
 }
 
+.scrape-lane.preview::before {
+  border-style: dashed;
+}
+
 .lane-label {
   display: flex;
   flex-direction: column;
@@ -49,6 +57,16 @@
   cursor: pointer;
   position: relative;
   z-index: 50;
+}
+
+.scrape-lane.preview .lane-label {
+  background: rgba(74, 158, 255, 0.95);
+  color: #fff;
+}
+
+.scrape-lane.preview .pass-number,
+.scrape-lane.preview .direction-arrow {
+  color: #fff;
 }
 
 .lane-label:hover {

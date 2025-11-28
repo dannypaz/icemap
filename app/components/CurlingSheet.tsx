@@ -30,6 +30,10 @@ export function CurlingSheet({ children }: CurlingSheetProps) {
 
           {/* Hog line - thick red line below house */}
           <div className="hog-line"></div>
+
+          {/* Hack - footholds at top of sheet */}
+          <div className="hack hack-left"></div>
+          <div className="hack hack-right"></div>
         </div>
 
         {/* Pattern overlays */}
