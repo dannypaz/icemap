@@ -1,4 +1,4 @@
-import { CurlingVisualizer } from './components/CurlingVisualizer'
+import { CurlingVisualizer } from "./components/CurlingVisualizer";
 
 export default function Home() {
   return (
@@ -13,11 +13,8 @@ export default function Home() {
       </main>
 
       <footer className="app-footer">
-        <p>
-          Ice scrapers use a 5ft blade across a 14ft sheet.
-          Overlapping passes ensure even ice quality.
-        </p>
+        <p>Our examples use a 5ft blade across a 14ft sheet.</p>
       </footer>
     </div>
-  )
+  );
 }

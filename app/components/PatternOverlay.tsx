@@ -27,10 +27,13 @@ interface PatternConfig {
   lanes: Lane[];
 }
 
+// Sideline width
+const SIDELINE_WIDTH_FT = 2.5;
+
 // Lane positions ordered by pass sequence: middle out, alternating down/up
 const PATTERNS: Record<string, PatternConfig> = {
-  "3-pass": {
-    // Start center, then left, then right
+  "3-pass-sidelines": {
+    // Start center, then left, then right, then sidelines
     color: "rgba(0, 200, 100, 0.25)",
     borderColor: "rgba(0, 200, 100, 0.6)",
     hoverColor: "rgba(0, 200, 100, 0.45)",
@@ -38,6 +41,12 @@ const PATTERNS: Record<string, PatternConfig> = {
       { startFt: 4.5, widthFt: SCRAPER_WIDTH_FT, direction: "down" }, // Pass 1: Center - DOWN
       { startFt: 0, widthFt: SCRAPER_WIDTH_FT, direction: "up" }, // Pass 2: Left - UP
       { startFt: 9, widthFt: SCRAPER_WIDTH_FT, direction: "down" }, // Pass 3: Right - DOWN
+      { startFt: 0, widthFt: SIDELINE_WIDTH_FT, direction: "up" }, // Pass 4: Left sideline - UP
+      {
+        startFt: SHEET_WIDTH_FT - SIDELINE_WIDTH_FT,
+        widthFt: SIDELINE_WIDTH_FT,
+        direction: "down",
+      }, // Pass 5: Right sideline - DOWN
     ],
   },
   "4-pass (1-hole)": {
@@ -144,14 +153,14 @@ const PATTERNS: Record<string, PatternConfig> = {
 
 // Short ID mapping for URL encoding
 const PATTERN_ID_MAP: Record<string, string> = {
-  "3": "3-pass",
+  "3s": "3-pass-sidelines",
   "4": "4-pass (1-hole)",
   "5": "5-pass (2-hole)",
   "6": "6-pass (2-hole)",
 };
 
 const PATTERN_KEY_TO_ID: Record<string, string> = {
-  "3-pass": "3",
+  "3-pass-sidelines": "3s",
   "4-pass (1-hole)": "4",
   "5-pass (2-hole)": "5",
   "6-pass (2-hole)": "6",

@@ -26,13 +26,8 @@ export function usePatternState() {
     return patterns.slice(0, MAX_LIST_SIZE)
   }, [searchParams])
 
-  // Parse sidelines from URL
-  const withSidelines = useMemo(() => {
-    return searchParams.get('s') === '1'
-  }, [searchParams])
-
   // Update URL with new state
-  const updateUrl = useCallback((list: string[], sidelines: boolean) => {
+  const updateUrl = useCallback((list: string[]) => {
     const params = new URLSearchParams()
 
     // Add list param if not empty
@@ -43,11 +38,6 @@ export function usePatternState() {
       if (ids.length > 0) {
         params.set('list', ids.join(','))
       }
-    }
-
-    // Only add sidelines param if enabled
-    if (sidelines) {
-      params.set('s', '1')
     }
 
     const queryString = params.toString()
@@ -62,25 +52,20 @@ export function usePatternState() {
     if (scrapeList.length >= MAX_LIST_SIZE) return
 
     const newList = [...scrapeList, patternKey]
-    updateUrl(newList, withSidelines)
-  }, [scrapeList, withSidelines, updateUrl])
+    updateUrl(newList)
+  }, [scrapeList, updateUrl])
 
   // Remove a pattern at specific index
   const removePattern = useCallback((index: number) => {
     if (index < 0 || index >= scrapeList.length) return
 
     const newList = scrapeList.filter((_, i) => i !== index)
-    updateUrl(newList, withSidelines)
-  }, [scrapeList, withSidelines, updateUrl])
-
-  // Toggle sidelines
-  const toggleSidelines = useCallback(() => {
-    updateUrl(scrapeList, !withSidelines)
-  }, [scrapeList, withSidelines, updateUrl])
+    updateUrl(newList)
+  }, [scrapeList, updateUrl])
 
   // Clear all patterns
   const clearAll = useCallback(() => {
-    updateUrl([], false)
+    updateUrl([])
   }, [updateUrl])
 
   // Check if we can add more patterns
@@ -88,10 +73,8 @@ export function usePatternState() {
 
   return {
     scrapeList,
-    withSidelines,
     addPattern,
     removePattern,
-    toggleSidelines,
     clearAll,
     canAddMore,
     maxListSize: MAX_LIST_SIZE,

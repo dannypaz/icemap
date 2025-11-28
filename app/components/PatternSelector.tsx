@@ -9,8 +9,6 @@ interface PatternSelectorProps {
   scrapeList: string[]
   onAddPattern: (patternId: string) => void
   onRemovePattern: (index: number) => void
-  withSidelines: boolean
-  onToggleSidelines: () => void
   onClearAll: () => void
   canAddMore: boolean
   maxListSize: number
@@ -21,10 +19,10 @@ interface PatternSelectorProps {
 }
 
 const PATTERN_INFO: Record<string, { label: string; shortLabel: string; description: string }> = {
-  '3-pass': {
-    label: '3-Pass',
-    shortLabel: '3P',
-    description: 'Standard full coverage',
+  '3-pass-sidelines': {
+    label: '3-Pass with Sidelines',
+    shortLabel: '3P+S',
+    description: 'Full coverage + 2.5ft sides',
   },
   '4-pass (1-hole)': {
     label: '4-Pass',
@@ -47,8 +45,6 @@ export function PatternSelector({
   scrapeList,
   onAddPattern,
   onRemovePattern,
-  withSidelines,
-  onToggleSidelines,
   onClearAll,
   canAddMore,
   maxListSize,
@@ -140,25 +136,6 @@ export function PatternSelector({
             </div>
           </div>
 
-          {/* Sidelines Option in preview mode */}
-          <div className="sidelines-option">
-            <label className={`pattern-option sideline-toggle ${withSidelines ? 'selected' : ''}`}>
-              <input
-                type="checkbox"
-                checked={withSidelines}
-                onChange={onToggleSidelines}
-              />
-              <span
-                className="color-swatch"
-                style={{ backgroundColor: 'rgba(100, 180, 255, 0.7)' }}
-              />
-              <div className="pattern-info">
-                <span className="pattern-label">With Sidelines</span>
-                <span className="pattern-description">2.5ft passes on each side</span>
-              </div>
-            </label>
-          </div>
-
           {/* Legend */}
           <div className="legend">
             <h3>Sheet Info</h3>
@@ -246,25 +223,6 @@ export function PatternSelector({
                 )
               })}
             </div>
-          </div>
-
-          {/* Sidelines Option */}
-          <div className="sidelines-option">
-            <label className={`pattern-option sideline-toggle ${withSidelines ? 'selected' : ''}`}>
-              <input
-                type="checkbox"
-                checked={withSidelines}
-                onChange={onToggleSidelines}
-              />
-              <span
-                className="color-swatch"
-                style={{ backgroundColor: 'rgba(100, 180, 255, 0.7)' }}
-              />
-              <div className="pattern-info">
-                <span className="pattern-label">With Sidelines</span>
-                <span className="pattern-description">2.5ft passes on each side</span>
-              </div>
-            </label>
           </div>
 
           {/* Share Section */}

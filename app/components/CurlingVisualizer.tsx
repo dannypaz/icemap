@@ -4,7 +4,6 @@ import { Suspense, useState } from 'react'
 import { CurlingSheet } from './CurlingSheet'
 import { PatternSelector } from './PatternSelector'
 import { PatternOverlay } from './PatternOverlay'
-import { SidelinesOverlay } from './SidelinesOverlay'
 import { HeatmapOverlay } from './HeatmapOverlay'
 import { usePatternState } from '../hooks/usePatternState'
 
@@ -13,10 +12,8 @@ export type ViewMode = 'patterns' | 'heatmap'
 function CurlingVisualizerInner() {
   const {
     scrapeList,
-    withSidelines,
     addPattern,
     removePattern,
-    toggleSidelines,
     clearAll,
     canAddMore,
     maxListSize,
@@ -43,8 +40,6 @@ function CurlingVisualizerInner() {
           scrapeList={scrapeList}
           onAddPattern={addPattern}
           onRemovePattern={removePattern}
-          withSidelines={withSidelines}
-          onToggleSidelines={toggleSidelines}
           onClearAll={clearAll}
           canAddMore={canAddMore}
           maxListSize={maxListSize}
@@ -71,8 +66,6 @@ function CurlingVisualizerInner() {
             /* Heatmap view - render calculated coverage zones */
             <HeatmapOverlay scrapeList={scrapeList} />
           )}
-
-          {withSidelines && <SidelinesOverlay />}
         </CurlingSheet>
       </div>
     </>
