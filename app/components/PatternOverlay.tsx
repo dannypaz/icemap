@@ -11,6 +11,7 @@ const CENTER_FT = SHEET_WIDTH_FT / 2 // 7ft
 // Hole overlaps in feet
 const ONE_HOLE_FT = 2 / 12  // 2 inches = 0.167ft
 const TWO_HOLE_FT = 8 / 12  // 8 inches = 0.667ft
+const TWO_HALF_HOLE_FT = 12 / 12  // 12 inches = 1ft (2.5 hole)
 const EDGE_OVERLAP_FT = 3 / 12  // 3 inches over the side = 0.25ft
 
 interface Lane {
@@ -67,17 +68,19 @@ const PATTERNS: Record<string, PatternConfig> = {
     ],
   },
   '6-pass (2-hole)': {
-    // Start from inside (near center) and work out in pairs
-    // Outside passes overlap 3" past sheet edge
+    // Start from innermost (2.5 hole / 12" overlap) and work out
+    // Passes 1-2: 2.5 hole (~12" past center)
+    // Passes 3-4: 2 hole (~8" past center)
+    // Passes 5-6: Outside (3" over edge)
     color: 'rgba(220, 50, 100, 0.2)',
     borderColor: 'rgba(220, 50, 100, 0.6)',
     hoverColor: 'rgba(220, 50, 100, 0.4)',
     lanes: [
-      { startFt: CENTER_FT + TWO_HOLE_FT - SCRAPER_WIDTH_FT, widthFt: SCRAPER_WIDTH_FT, direction: 'down' }, // Pass 1: Left inside - DOWN
-      { startFt: CENTER_FT - TWO_HOLE_FT, widthFt: SCRAPER_WIDTH_FT, direction: 'up' },                      // Pass 2: Right inside - UP
-      { startFt: 1.5, widthFt: SCRAPER_WIDTH_FT, direction: 'down' },                                        // Pass 3: Left mid - DOWN
-      { startFt: 7.5, widthFt: SCRAPER_WIDTH_FT, direction: 'up' },                                          // Pass 4: Right mid - UP
-      { startFt: -EDGE_OVERLAP_FT, widthFt: SCRAPER_WIDTH_FT, direction: 'down' },                           // Pass 5: Left outside (3" over edge) - DOWN
+      { startFt: CENTER_FT + TWO_HALF_HOLE_FT - SCRAPER_WIDTH_FT, widthFt: SCRAPER_WIDTH_FT, direction: 'down' }, // Pass 1: Left innermost (12" past center) - DOWN
+      { startFt: CENTER_FT - TWO_HALF_HOLE_FT, widthFt: SCRAPER_WIDTH_FT, direction: 'up' },                      // Pass 2: Right innermost (12" past center) - UP
+      { startFt: CENTER_FT + TWO_HOLE_FT - SCRAPER_WIDTH_FT, widthFt: SCRAPER_WIDTH_FT, direction: 'down' },      // Pass 3: Left inside (8" past center) - DOWN
+      { startFt: CENTER_FT - TWO_HOLE_FT, widthFt: SCRAPER_WIDTH_FT, direction: 'up' },                           // Pass 4: Right inside (8" past center) - UP
+      { startFt: -EDGE_OVERLAP_FT, widthFt: SCRAPER_WIDTH_FT, direction: 'down' },                                // Pass 5: Left outside (3" over edge) - DOWN
       { startFt: SHEET_WIDTH_FT - SCRAPER_WIDTH_FT + EDGE_OVERLAP_FT, widthFt: SCRAPER_WIDTH_FT, direction: 'up' }, // Pass 6: Right outside (3" over edge) - UP
     ],
   },
@@ -115,11 +118,13 @@ export function PatternOverlay({ patternId, showLabels = true }: PatternOverlayP
               borderLeft: `2px solid ${pattern.borderColor}`,
               borderRight: `2px solid ${pattern.borderColor}`,
             }}
-            onMouseEnter={() => setHoveredLane(index)}
-            onMouseLeave={() => setHoveredLane(null)}
           >
             {showLabels && (
-              <div className="lane-label">
+              <div
+                className="lane-label"
+                onMouseEnter={() => setHoveredLane(index)}
+                onMouseLeave={() => setHoveredLane(null)}
+              >
                 <span className="pass-number">Pass {index + 1}</span>
                 <div className={`direction-arrow ${isDown ? 'arrow-down' : 'arrow-up'}`}>
                   {isDown ? '↓' : '↑'}

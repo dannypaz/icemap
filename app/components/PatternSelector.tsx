@@ -24,8 +24,8 @@ const PATTERN_INFO: Record<string, { label: string; description: string }> = {
     description: 'Center cut + ~8" overlap, 3" over edges',
   },
   '6-pass (2-hole)': {
-    label: '6-Pass (2-hole)',
-    description: 'Heavy scrape, ~8" overlap, 3" over edges',
+    label: '6-Pass (2.5/2-hole)',
+    description: '~12" inner + ~8" mid overlap, 3" over edges',
   },
 }
 
@@ -95,6 +95,7 @@ export function PatternSelector({
           <li><strong>Scraper blade:</strong> 5 feet</li>
           <li><strong>1-hole:</strong> ~2&quot; past center</li>
           <li><strong>2-hole:</strong> ~8&quot; past center</li>
+          <li><strong>2.5-hole:</strong> ~12&quot; past center</li>
           <li><strong>Edge overlap:</strong> ~3&quot; past sides</li>
           <li><strong>Sidelines:</strong> 2.5ft each side</li>
         </ul>

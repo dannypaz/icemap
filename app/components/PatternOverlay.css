@@ -2,19 +2,18 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  pointer-events: auto;
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
   padding-top: 3%;
   box-sizing: border-box;
-  cursor: pointer;
   transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.scrape-lane:hover {
-  z-index: 10;
+.scrape-lane.highlighted {
+  z-index: 100;
 }
 
 .scrape-lane::before {
@@ -26,18 +25,6 @@
   box-shadow: none;
   transition: all 0.2s ease;
   pointer-events: none;
-}
-
-.scrape-lane:hover::before {
-  border-left-width: 4px;
-  border-right-width: 4px;
-  box-shadow:
-    inset 4px 0 8px rgba(0, 0, 0, 0.15),
-    inset -4px 0 8px rgba(0, 0, 0, 0.15);
-}
-
-.scrape-lane.highlighted {
-  z-index: 10;
 }
 
 .scrape-lane.highlighted::before {
@@ -58,15 +45,19 @@
   border-radius: 6px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  pointer-events: auto;
+  cursor: pointer;
+  position: relative;
+  z-index: 50;
 }
 
-.scrape-lane:hover .lane-label {
+.lane-label:hover {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .pass-number {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-jetbrains), 'JetBrains Mono', monospace;
   font-size: 11px;
   font-weight: 600;
   color: #333;

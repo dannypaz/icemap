@@ -32,13 +32,34 @@ Always use `pnpm` (not npm or yarn).
 ## Curling Domain Knowledge
 - **Sheet dimensions**: 14ft wide × ~150ft long
 - **Scraper blade**: 5ft wide
-- **Hole terminology**: "1-hole" = ~2" past center, "2-hole" = ~8" past center
+- **Hole terminology**:
+  - "1-hole" = ~2" past center
+  - "2-hole" = ~8" past center
+  - "2.5-hole" = ~12" past center
 - **Edge overlap**: Outside passes typically go ~3" past sheet edges
 - **Pass direction**: Alternates down/up, starting from middle and working outward
 - **Sidelines**: Optional 2.5ft passes on each side
 
-## Pattern Definition (PatternOverlay.tsx)
-Patterns are defined in `PATTERNS` object with:
+## Pattern Definitions
+
+### 6-pass (2-hole)
+- Passes 1-2: 2.5 hole (12" past center) - innermost
+- Passes 3-4: 2 hole (8" past center)
+- Passes 5-6: Outside (3" over edge)
+
+### 5-pass (2-hole)
+- Pass 1: Center cut
+- Passes 2-3: 2 hole (8" past center)
+- Passes 4-5: Outside (3" over edge)
+
+### 4-pass (1-hole)
+- Passes 1-2: 1 hole (2" past center)
+- Passes 3-4: Outside (3" over edge)
+
+### 3-pass
+- Pass 1: Center, Pass 2: Left, Pass 3: Right
+
+## Pattern Config (PatternOverlay.tsx)
 ```ts
 {
   color: 'rgba(r,g,b,0.2)',      // Fill color
@@ -47,21 +68,20 @@ Patterns are defined in `PATTERNS` object with:
   lanes: [{ startFt, widthFt, direction }]
 }
 ```
-Lane positions are in feet, converted to percentages for rendering.
-
-## Styling Conventions
-- Use CSS variables from globals.css: `--font-outfit`, `--font-jetbrains`
-- Dark theme: backgrounds `#0a1520` to `#162535`
-- Accent colors: blue `#60a5fa`, purple `#a78bfa`
-- Co-locate CSS files with components
 
 ## Key Constants
 ```ts
 SHEET_WIDTH_FT = 14
 SCRAPER_WIDTH_FT = 5
 CENTER_FT = 7
-ONE_HOLE_FT = 2/12  // 2 inches
-TWO_HOLE_FT = 8/12  // 8 inches
+ONE_HOLE_FT = 2/12      // 2 inches
+TWO_HOLE_FT = 8/12      // 8 inches
+TWO_HALF_HOLE_FT = 1    // 12 inches (2.5 hole)
 EDGE_OVERLAP_FT = 3/12  // 3 inches
 SIDELINE_WIDTH_FT = 2.5
 ```
+
+## Styling Conventions
+- CSS variables: `--font-outfit`, `--font-jetbrains`
+- Dark theme: `#0a1520` to `#162535`
+- Accents: blue `#60a5fa`, purple `#a78bfa`
