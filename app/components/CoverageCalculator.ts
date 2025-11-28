@@ -71,27 +71,43 @@ export function calculateCoverageZones(lanes: Lane[]): CoverageZone[] {
 }
 
 /**
- * Get heat map color based on pass count
+ * Get heat map color based on pass count (supports 1-20+ overlaps)
+ * Gradient: Blue -> Cyan -> Green -> Yellow -> Orange -> Red -> Dark Red
  */
 export function getHeatmapColor(passCount: number): string {
   const colors: Record<number, string> = {
-    1: '#3b82f6', // Blue
-    2: '#06b6d4', // Cyan
-    3: '#22c55e', // Green
-    4: '#eab308', // Yellow
-    5: '#f97316', // Orange
+    1: '#60a5fa',  // Light blue
+    2: '#3b82f6',  // Blue
+    3: '#2563eb',  // Darker blue
+    4: '#0891b2',  // Cyan
+    5: '#06b6d4',  // Light cyan
+    6: '#14b8a6',  // Teal
+    7: '#10b981',  // Emerald
+    8: '#22c55e',  // Green
+    9: '#84cc16',  // Lime
+    10: '#a3e635', // Light lime
+    11: '#facc15', // Yellow
+    12: '#eab308', // Amber
+    13: '#f59e0b', // Orange-yellow
+    14: '#f97316', // Orange
+    15: '#ea580c', // Dark orange
+    16: '#dc2626', // Red
+    17: '#b91c1c', // Dark red
+    18: '#991b1b', // Darker red
+    19: '#7f1d1d', // Very dark red
+    20: '#450a0a', // Maroon
   }
 
   if (passCount <= 0) return 'transparent'
-  if (passCount >= 6) return '#ef4444' // Red for 6+
-  return colors[passCount] || '#ef4444'
+  if (passCount > 20) return '#450a0a' // Maroon for 20+
+  return colors[passCount] || '#450a0a'
 }
 
 /**
  * Get text color for heat map labels (for contrast)
  */
 export function getHeatmapTextColor(passCount: number): string {
-  // Dark text for light backgrounds (yellow), white for others
-  if (passCount === 4) return '#1f2937' // Dark gray for yellow
+  // Dark text for light/yellow backgrounds, white for others
+  if (passCount >= 9 && passCount <= 13) return '#1f2937' // Dark gray for yellow/lime
   return '#ffffff'
 }
