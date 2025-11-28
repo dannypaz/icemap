@@ -18,6 +18,7 @@ interface Lane {
   startFt: number;
   widthFt: number;
   direction: "down" | "up";
+  label?: string; // Optional custom label (e.g., "Sideline")
 }
 
 interface PatternConfig {
@@ -41,11 +42,17 @@ const PATTERNS: Record<string, PatternConfig> = {
       { startFt: 4.5, widthFt: SCRAPER_WIDTH_FT, direction: "down" }, // Pass 1: Center - DOWN
       { startFt: 0, widthFt: SCRAPER_WIDTH_FT, direction: "up" }, // Pass 2: Left - UP
       { startFt: 9, widthFt: SCRAPER_WIDTH_FT, direction: "down" }, // Pass 3: Right - DOWN
-      { startFt: 0, widthFt: SIDELINE_WIDTH_FT, direction: "up" }, // Pass 4: Left sideline - UP
+      {
+        startFt: 0,
+        widthFt: SIDELINE_WIDTH_FT,
+        direction: "up",
+        label: "Sideline",
+      }, // Pass 4: Left sideline - UP
       {
         startFt: SHEET_WIDTH_FT - SIDELINE_WIDTH_FT,
         widthFt: SIDELINE_WIDTH_FT,
         direction: "down",
+        label: "Sideline",
       }, // Pass 5: Right sideline - DOWN
     ],
   },
@@ -225,7 +232,9 @@ export function PatternOverlay({
                 onMouseEnter={() => setHoveredLane(index)}
                 onMouseLeave={() => setHoveredLane(null)}
               >
-                <span className="pass-number">Pass {index + 1}</span>
+                <span className="pass-number">
+                  {lane.label || `Pass ${index + 1}`}
+                </span>
                 <div
                   className={`direction-arrow ${
                     isDown ? "arrow-down" : "arrow-up"
