@@ -1,13 +1,10 @@
 'use client'
 
-import { Suspense, useState } from 'react'
+import { Suspense } from 'react'
 import { CurlingSheet } from './CurlingSheet'
 import { PatternSelector } from './PatternSelector'
-import { PatternOverlay } from './PatternOverlay'
 import { HeatmapOverlay } from './HeatmapOverlay'
 import { usePatternState } from '../hooks/usePatternState'
-
-export type ViewMode = 'patterns' | 'heatmap'
 
 function CurlingVisualizerInner() {
   const {
@@ -19,20 +16,6 @@ function CurlingVisualizerInner() {
     maxListSize,
   } = usePatternState()
 
-  const [previewPattern, setPreviewPattern] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<ViewMode>('patterns')
-
-  // Clear preview when switching to heatmap mode
-  const handleViewModeChange = (mode: ViewMode) => {
-    if (mode === 'heatmap') {
-      setPreviewPattern(null)
-    }
-    setViewMode(mode)
-  }
-
-  // Show labels when exactly 1 pattern visible (only in patterns mode when previewing)
-  const showLabels = viewMode === 'patterns' && previewPattern !== null
-
   return (
     <>
       <div className="pattern-selector-wrapper">
@@ -43,29 +26,12 @@ function CurlingVisualizerInner() {
           onClearAll={clearAll}
           canAddMore={canAddMore}
           maxListSize={maxListSize}
-          previewPattern={previewPattern}
-          onPreviewPattern={setPreviewPattern}
-          viewMode={viewMode}
-          onViewModeChange={handleViewModeChange}
         />
       </div>
 
       <div className="sheet-wrapper">
         <CurlingSheet>
-          {viewMode === 'patterns' ? (
-            /* Patterns mode - only show preview pattern */
-            previewPattern && (
-              <PatternOverlay
-                key={`preview-${previewPattern}`}
-                patternId={previewPattern}
-                showLabels={true}
-                isPreview={true}
-              />
-            )
-          ) : (
-            /* Heatmap view - render calculated coverage zones */
-            <HeatmapOverlay scrapeList={scrapeList} />
-          )}
+          <HeatmapOverlay scrapeList={scrapeList} />
         </CurlingSheet>
       </div>
     </>
