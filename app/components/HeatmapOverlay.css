@@ -4,6 +4,16 @@
   pointer-events: none;
 }
 
+.highlight-lane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 2px rgba(80, 160, 255, 0.4), 0 10px 25px rgba(20, 40, 70, 0.4);
+  border-radius: 4px;
+  z-index: 2;
+}
+
 .heatmap-zone {
   position: absolute;
   top: 0;

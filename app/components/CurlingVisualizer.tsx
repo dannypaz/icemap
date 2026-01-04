@@ -1,20 +1,37 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useMemo, useState } from 'react'
 import { CurlingSheet } from './CurlingSheet'
 import { PatternSelector } from './PatternSelector'
 import { HeatmapOverlay } from './HeatmapOverlay'
 import { usePatternState } from '../hooks/usePatternState'
+import { getPatternLanes } from './PatternOverlay'
 
 function CurlingVisualizerInner() {
   const {
     scrapeList,
     addPattern,
     removePattern,
+    updateAngle,
+    updateInside,
     clearAll,
     canAddMore,
     maxListSize,
   } = usePatternState()
+  const [activePass, setActivePass] = useState<{ entryIndex: number; passIndex: number } | null>(null)
+
+  const maxPassCounts = useMemo(() => {
+    return scrapeList.map((entry) => getPatternLanes(entry.patternKey, 0, 0).length)
+  }, [scrapeList])
+
+  const handleSelectPass = (entryIndex: number, passIndex: number) => {
+    setActivePass((prev) => {
+      if (prev?.entryIndex === entryIndex && prev?.passIndex === passIndex) {
+        return null
+      }
+      return { entryIndex, passIndex }
+    })
+  }
 
   return (
     <>
@@ -23,15 +40,20 @@ function CurlingVisualizerInner() {
           scrapeList={scrapeList}
           onAddPattern={addPattern}
           onRemovePattern={removePattern}
+          onUpdateAngle={updateAngle}
+          onUpdateInside={updateInside}
           onClearAll={clearAll}
           canAddMore={canAddMore}
           maxListSize={maxListSize}
+          onSelectPass={handleSelectPass}
+          activePass={activePass}
+          passCounts={maxPassCounts}
         />
       </div>
 
       <div className="sheet-wrapper">
         <CurlingSheet>
-          <HeatmapOverlay scrapeList={scrapeList} />
+          <HeatmapOverlay scrapeList={scrapeList} activePass={activePass} />
         </CurlingSheet>
       </div>
     </>
