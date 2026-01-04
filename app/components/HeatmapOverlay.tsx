@@ -2,16 +2,17 @@
 
 import { useMemo } from 'react'
 import { calculateCoverageZones, getHeatmapColor, getHeatmapTextColor, Lane } from './CoverageCalculator'
-import { getPatternLanes } from './PatternOverlay'
+import { getPatternLanes, getPassLanes, getHighlightGroupById } from './PatternOverlay'
 import './HeatmapOverlay.css'
 import { ANGLED_BLADE_DEG, INSIDE_OFFSET_FT, SHEET_WIDTH_FT } from '../lib/calibrations'
+import type { ActiveHighlight } from './PatternSelector'
 
 interface HeatmapOverlayProps {
   scrapeList: { patternKey: string; angleOn: boolean; inside: boolean }[]
-  activePass?: { entryIndex: number; passIndex: number } | null
+  activeHighlight?: ActiveHighlight | null
 }
 
-export function HeatmapOverlay({ scrapeList, activePass }: HeatmapOverlayProps) {
+export function HeatmapOverlay({ scrapeList, activeHighlight }: HeatmapOverlayProps) {
   // Collect all lanes from all patterns in the scrape list
   const allLanes = useMemo(() => {
     const lanes: Lane[] = []
@@ -36,17 +37,32 @@ export function HeatmapOverlay({ scrapeList, activePass }: HeatmapOverlayProps) 
     return calculateCoverageZones(allLanes)
   }, [allLanes])
 
-  const highlightLane = useMemo(() => {
-    if (!activePass) return null
-    const entry = scrapeList[activePass.entryIndex]
-    if (!entry) return null
+  const highlightLanes = useMemo(() => {
+    if (!activeHighlight) return []
+    const entry = scrapeList[activeHighlight.entryIndex]
+    if (!entry) return []
     const angleDeg = entry.angleOn ? ANGLED_BLADE_DEG : 0
     const insideOffset = entry.inside ? INSIDE_OFFSET_FT : 0
+
+    if (activeHighlight.mode === 'pass') {
+      const lanes = getPassLanes(entry.patternKey, angleDeg, insideOffset)
+      const lane = lanes[activeHighlight.passIndex - 1]
+      if (!lane || lane.widthFt <= 0) return []
+      return [lane]
+    }
+
+    const group = getHighlightGroupById(entry.patternKey, activeHighlight.groupId)
+    if (!group) return []
     const lanes = getPatternLanes(entry.patternKey, angleDeg, insideOffset)
-    const lane = lanes[activePass.passIndex - 1]
-    if (!lane || lane.widthFt <= 0) return null
-    return lane
-  }, [activePass, scrapeList])
+    const selected: Lane[] = []
+    for (const laneIndex of group.laneIndexes) {
+      const lane = lanes[laneIndex]
+      if (lane && lane.widthFt > 0) {
+        selected.push(lane)
+      }
+    }
+    return selected
+  }, [activeHighlight, scrapeList])
 
   // Convert feet to percentage
   const ftToPercent = (ft: number) => (ft / SHEET_WIDTH_FT) * 100
@@ -57,15 +73,16 @@ export function HeatmapOverlay({ scrapeList, activePass }: HeatmapOverlayProps) 
 
   return (
     <div className="heatmap-overlay">
-      {highlightLane && (
+      {highlightLanes.map((lane, laneIndex) => (
         <div
+          key={`highlight-${laneIndex}`}
           className="highlight-lane"
           style={{
-            left: `${ftToPercent(highlightLane.startFt)}%`,
-            width: `${ftToPercent(highlightLane.widthFt)}%`,
+            left: `${ftToPercent(lane.startFt)}%`,
+            width: `${ftToPercent(lane.widthFt)}%`,
           }}
         />
-      )}
+      ))}
       {zones.map((zone, index) => {
         const color = getHeatmapColor(zone.passCount)
         const textColor = getHeatmapTextColor(zone.passCount)

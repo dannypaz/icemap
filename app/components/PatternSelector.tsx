@@ -5,6 +5,7 @@ import { calculateCoverageZones, getHeatmapColor } from "./CoverageCalculator";
 import {
   getEffectiveBladeWidth,
   getPatternLanes,
+  getPatternHighlightGroups,
   PATTERNS,
 } from "./PatternOverlay";
 import "./PatternSelector.css";
@@ -14,6 +15,10 @@ import {
   SCRAPER_WIDTH_FT,
   SHEET_WIDTH_FT,
 } from "../lib/calibrations";
+
+export type ActiveHighlight =
+  | { entryIndex: number; mode: "pass"; passIndex: number }
+  | { entryIndex: number; mode: "group"; groupId: string };
 
 interface PatternSelectorProps {
   scrapeList: { patternKey: string; angleOn: boolean; inside: boolean }[];
@@ -28,49 +33,61 @@ interface PatternSelectorProps {
   onClearAll: () => void;
   canAddMore: boolean;
   maxListSize: number;
-  onSelectPass: (entryIndex: number, passIndex: number) => void;
-  activePass: { entryIndex: number; passIndex: number } | null;
+  onSelectHighlight: (selection: ActiveHighlight) => void;
+  activeHighlight: ActiveHighlight | null;
   passCounts: number[];
 }
 
 const PATTERN_INFO: Record<
   string,
-  { label: string; shortLabel: string; description: string }
+  {
+    label: string;
+    shortLabel: string;
+    description: string;
+    passDetails?: string[];
+    notes?: string[];
+  }
 > = {
   "3-pass (sidelines)": {
-    label: "3-Pass",
-    shortLabel: "3P",
+    label: "3-Pass w/ sidelines",
+    shortLabel: "3P + sides",
     description: "Straight, centered on sidelines",
+    passDetails: [
+      "Straight up the middle",
+      'Left side, 6" from the sideline',
+      'Right side, 6" from the sideline',
+    ],
+    notes: ["Sidelines hold half a blade on both sides"],
   },
   "4-pass (1.5-hole)": {
-    label: "4-Pass",
-    shortLabel: "4P",
+    label: "4-Pass (1 1/2)",
+    shortLabel: "4P - 1.5",
     description: '1.5 hole overlap, 3" inside edges',
   },
   "4-pass (2.5-hole)": {
-    label: "4-Pass (2.5)",
-    shortLabel: "4P",
+    label: "4-Pass (2 1/2)",
+    shortLabel: "4P - 2.5",
     description: '2.5 hole overlap, 3" inside edges',
-  },
-  "5-pass (2.5-hole)": {
-    label: "5-Pass (2 1/2)",
-    shortLabel: "5P",
-    description: 'Center straight, 2.5 hole overlap, 6" inside edges',
   },
   "5-pass (1.5-hole)": {
     label: "5-Pass (1 1/2)",
-    shortLabel: "5P",
+    shortLabel: "5P - 1.5",
     description: 'Center straight, 1.5 hole overlap, 6" inside edges',
   },
-  "6-pass (4/2/0)": {
-    label: "6-Pass (4/2/0)",
-    shortLabel: "6P",
-    description: "4-hole, 2-hole, side line",
+  "5-pass (2.5-hole)": {
+    label: "5-Pass (2 1/2)",
+    shortLabel: "5P - 2.5",
+    description: 'Center straight, 2.5 hole overlap, 6" inside edges',
   },
   "6-pass (3/1/0)": {
     label: "6-Pass (3/1/0)",
-    shortLabel: "6P",
+    shortLabel: "6P 3-1-0",
     description: "3-hole, 1-hole, side line",
+  },
+  "6-pass (4/2/0)": {
+    label: "6-Pass (4/2/0)",
+    shortLabel: "6P 4-2-0",
+    description: "4-hole, 2-hole, side line",
   },
 };
 
@@ -101,8 +118,8 @@ export function PatternSelector({
   onClearAll,
   canAddMore,
   maxListSize,
-  onSelectPass,
-  activePass,
+  onSelectHighlight,
+  activeHighlight,
   passCounts,
 }: PatternSelectorProps) {
   const [copied, setCopied] = useState(false);
@@ -110,6 +127,9 @@ export function PatternSelector({
     useState<Record<string, { angleOn: boolean; inside: boolean }>>(
       DEFAULT_ADD_OPTIONS
     );
+  const [expandedEntries, setExpandedEntries] = useState<
+    Record<string, boolean>
+  >({});
 
   const addPatternKeys = useMemo(() => Object.keys(PATTERNS), []);
 
@@ -132,6 +152,13 @@ export function PatternSelector({
   const handleAddClick = (patternKey: string) => {
     const options = addOptions[patternKey] ?? { angleOn: false, inside: false };
     onAddPattern(patternKey, options.angleOn, options.inside);
+  };
+
+  const toggleExpanded = (key: string) => {
+    setExpandedEntries((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
 
   const buildSnapshotSvg = () => {
@@ -311,67 +338,176 @@ export function PatternSelector({
                 angleDeg
               );
               const passCount = passCounts[index] ?? 0;
-              const configLocked = activePass?.entryIndex === index;
+              const configLocked = activeHighlight?.entryIndex === index;
+              const highlightGroups = getPatternHighlightGroups(
+                entry.patternKey
+              );
+              const entryKey = `${entry.patternKey}-${index}`;
+              const isExpanded = expandedEntries[entryKey] ?? false;
+              const summaryAngleLabel = formatAngleLabel(entry.angleOn);
+              const summaryInsideLabel = formatInsideLabel(entry.inside);
               return (
                 <div
-                  key={`${entry.patternKey}-${index}`}
-                  className="scrape-list-item"
+                  key={entryKey}
+                  className={`scrape-list-item ${isExpanded ? "expanded" : ""}`}
                 >
-                  <span className="item-number">{index + 1}</span>
-                  <span
-                    className="item-color"
-                    style={{
-                      backgroundColor: pattern?.color.replace("0.25", "0.7"),
-                    }}
-                  />
-                  <span className="item-label">
-                    {info?.shortLabel || entry.patternKey}
-                  </span>
-                  <div className="pattern-options">
+                  <div className="scrape-item-summary">
                     <button
-                      className={`option-pill ${entry.angleOn ? "active" : ""}`}
-                      disabled={configLocked}
-                      onClick={() => onUpdateAngle(index, !entry.angleOn)}
+                      type="button"
+                      className="summary-toggle"
+                      onClick={() => toggleExpanded(entryKey)}
                     >
-                      {formatAngleLabel(entry.angleOn)}
+                      <span className="item-number">{index + 1}</span>
+                      <span
+                        className="item-color"
+                        style={{
+                          backgroundColor: pattern?.color.replace(
+                            "0.25",
+                            "0.7"
+                          ),
+                        }}
+                      />
+                      <div className="summary-text">
+                        <span className="summary-label">
+                          {info?.shortLabel || entry.patternKey}
+                        </span>
+                        <div className="summary-tags">
+                          <span className="summary-tag">
+                            {summaryAngleLabel}
+                          </span>
+                          <span className="summary-tag">
+                            {summaryInsideLabel}
+                          </span>
+                        </div>
+                      </div>
+                      <span
+                        className={`summary-caret ${isExpanded ? "open" : ""}`}
+                        aria-hidden="true"
+                      >
+                        ▾
+                      </span>
                     </button>
                     <button
-                      className={`option-pill ${entry.inside ? "active" : ""}`}
-                      disabled={configLocked}
-                      onClick={() => onUpdateInside(index, !entry.inside)}
+                      className="remove-btn"
+                      onClick={() => onRemovePattern(index)}
+                      title="Remove"
                     >
-                      {formatInsideLabel(entry.inside)}
+                      ×
                     </button>
-                    <span className="angle-meta">
-                      Blade {effectiveWidth.toFixed(2)} ft
-                    </span>
                   </div>
-                  {passCount > 0 && (
-                    <div className="pass-buttons">
-                      {Array.from({ length: passCount }, (_, passIndex) => {
-                        const isActive =
-                          activePass?.entryIndex === index &&
-                          activePass?.passIndex === passIndex + 1;
-                        return (
-                          <button
-                            key={`pass-${index}-${passIndex}`}
-                            className={`pass-btn ${isActive ? "active" : ""}`}
-                            onClick={() => onSelectPass(index, passIndex + 1)}
-                            title={`Highlight pass ${passIndex + 1}`}
-                          >
-                            {passIndex + 1}
-                          </button>
-                        );
-                      })}
+
+                  {isExpanded && (
+                    <div className="scrape-item-details">
+                      <div className="pattern-options">
+                        <button
+                          className={`option-pill ${
+                            entry.angleOn ? "active" : ""
+                          }`}
+                          disabled={configLocked}
+                          onClick={() => onUpdateAngle(index, !entry.angleOn)}
+                        >
+                          {formatAngleLabel(entry.angleOn)}
+                        </button>
+                        <button
+                          className={`option-pill ${
+                            entry.inside ? "active" : ""
+                          }`}
+                          disabled={configLocked}
+                          onClick={() => onUpdateInside(index, !entry.inside)}
+                        >
+                          {formatInsideLabel(entry.inside)}
+                        </button>
+                        <span className="angle-meta">
+                          Blade {effectiveWidth.toFixed(2)} ft
+                        </span>
+                      </div>
+
+                      {passCount > 0 && (
+                        <div className="pass-buttons">
+                          {Array.from({ length: passCount }, (_, passIndex) => {
+                            const isActive =
+                              activeHighlight?.entryIndex === index &&
+                              activeHighlight.mode === "pass" &&
+                              activeHighlight.passIndex === passIndex + 1;
+                            const passDetail = info?.passDetails?.[passIndex];
+                            const passTitle = passDetail
+                              ? `Pass ${passIndex + 1}: ${passDetail}`
+                              : `Highlight pass ${passIndex + 1}`;
+                            return (
+                              <button
+                                key={`pass-${index}-${passIndex}`}
+                                className={`pass-btn ${
+                                  isActive ? "active" : ""
+                                }`}
+                                onClick={() =>
+                                  onSelectHighlight({
+                                    entryIndex: index,
+                                    mode: "pass",
+                                    passIndex: passIndex + 1,
+                                  })
+                                }
+                                title={passTitle}
+                              >
+                                {passIndex + 1}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {highlightGroups.length > 0 && (
+                        <div className="highlight-buttons">
+                          {highlightGroups.map((group) => {
+                            const isGroupActive =
+                              activeHighlight?.entryIndex === index &&
+                              activeHighlight.mode === "group" &&
+                              activeHighlight.groupId === group.id;
+                            return (
+                              <button
+                                key={`highlight-${index}-${group.id}`}
+                                className={`highlight-btn ${
+                                  isGroupActive ? "active" : ""
+                                }`}
+                                onClick={() =>
+                                  onSelectHighlight({
+                                    entryIndex: index,
+                                    mode: "group",
+                                    groupId: group.id,
+                                  })
+                                }
+                                title={`Highlight ${group.label}`}
+                              >
+                                {group.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {(info?.passDetails?.length || info?.notes?.length) && (
+                        <div className="pass-details">
+                          {info?.passDetails?.length ? (
+                            <ol className="pass-step-list">
+                              {info.passDetails.map((detail, detailIndex) => (
+                                <li key={`pass-detail-${index}-${detailIndex}`}>
+                                  {detail}
+                                </li>
+                              ))}
+                            </ol>
+                          ) : null}
+                          {info?.notes?.length ? (
+                            <ul className="pass-notes">
+                              {info.notes.map((note, noteIndex) => (
+                                <li key={`pass-note-${index}-${noteIndex}`}>
+                                  {note}
+                                </li>
+                              ))}
+                            </ul>
+                          ) : null}
+                        </div>
+                      )}
                     </div>
                   )}
-                  <button
-                    className="remove-btn"
-                    onClick={() => onRemovePattern(index)}
-                    title="Remove"
-                  >
-                    ×
-                  </button>
                 </div>
               );
             })}

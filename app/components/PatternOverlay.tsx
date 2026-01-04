@@ -22,6 +22,13 @@ interface Lane {
   direction: "down" | "up";
   label?: string; // Optional custom label (e.g., "Sideline")
   angleOn?: boolean;
+  countsAsPass?: boolean;
+}
+
+export interface HighlightGroup {
+  id: string;
+  label: string;
+  laneIndexes: number[];
 }
 
 interface PatternConfig {
@@ -29,12 +36,13 @@ interface PatternConfig {
   borderColor: string;
   hoverColor: string;
   lanes: Lane[];
+  highlightGroups?: HighlightGroup[];
 }
 
 // Lane positions ordered by pass sequence: middle out, alternating down/up
 const PATTERNS: Record<string, PatternConfig> = {
   "3-pass (sidelines)": {
-    // Straight blade, centered on sidelines (half blade in the sheet)
+    // Straight up the middle + two 6" inside passes, plus half-blade sideline holds
     color: "rgba(80, 200, 140, 0.25)",
     borderColor: "rgba(80, 200, 140, 0.6)",
     hoverColor: "rgba(80, 200, 140, 0.45)",
@@ -44,19 +52,45 @@ const PATTERNS: Record<string, PatternConfig> = {
         widthFt: SCRAPER_WIDTH_FT,
         direction: "down",
         angleOn: false,
+        countsAsPass: true,
       }, // Pass 1: Center straight - DOWN
       {
-        startFt: -SCRAPER_WIDTH_FT / 2,
+        startFt: INSIDE_OFFSET_FT,
         widthFt: SCRAPER_WIDTH_FT,
         direction: "up",
         angleOn: false,
-      }, // Pass 2: Left sideline - UP
+        countsAsPass: true,
+      }, // Pass 2: Left lane, 6" inside sideline - UP
       {
-        startFt: SHEET_WIDTH_FT - SCRAPER_WIDTH_FT / 2,
+        startFt: SHEET_WIDTH_FT - SCRAPER_WIDTH_FT - INSIDE_OFFSET_FT,
         widthFt: SCRAPER_WIDTH_FT,
+        direction: "up",
+        angleOn: false,
+        countsAsPass: true,
+      }, // Pass 3: Right lane, 6" inside sideline - UP
+      {
+        startFt: 0,
+        widthFt: SCRAPER_WIDTH_FT / 2,
         direction: "down",
         angleOn: false,
-      }, // Pass 3: Right sideline - DOWN
+        countsAsPass: false,
+        label: "Left sideline hold",
+      }, // Coverage: Left sideline half blade
+      {
+        startFt: SHEET_WIDTH_FT - SCRAPER_WIDTH_FT / 2,
+        widthFt: SCRAPER_WIDTH_FT / 2,
+        direction: "down",
+        angleOn: false,
+        countsAsPass: false,
+        label: "Right sideline hold",
+      }, // Coverage: Right sideline half blade
+    ],
+    highlightGroups: [
+      {
+        id: "sideline",
+        label: "Sideline",
+        laneIndexes: [3, 4],
+      },
     ],
   },
   "4-pass (1.5-hole)": {
@@ -314,6 +348,28 @@ export function getPatternLanes(
   });
 }
 
+export function getPassLanes(
+  patternKey: string,
+  angleDeg = 0,
+  insideOffsetFt = 0,
+): Lane[] {
+  return getPatternLanes(patternKey, angleDeg, insideOffsetFt).filter(
+    (lane) => lane.countsAsPass !== false,
+  );
+}
+
+export function getPatternHighlightGroups(patternKey: string): HighlightGroup[] {
+  const pattern = PATTERNS[patternKey];
+  return pattern?.highlightGroups ?? [];
+}
+
+export function getHighlightGroupById(
+  patternKey: string,
+  groupId: string,
+): HighlightGroup | undefined {
+  return getPatternHighlightGroups(patternKey).find((group) => group.id === groupId);
+}
+
 // Short ID mapping for URL encoding
 const PATTERN_ID_MAP: Record<string, string> = {
   "3": "3-pass (sidelines)",
@@ -368,12 +424,17 @@ export function PatternOverlay({
   const pattern = PATTERNS[patternId];
   if (!pattern) return null;
   const lanes = getPatternLanes(patternId, 0, 0);
+  let passCounter = 0;
 
   return (
     <>
       {lanes.map((lane, index) => {
         const isDown = lane.direction === "down";
         const isHovered = hoveredLane === index;
+        const isPassLane = lane.countsAsPass !== false;
+        const displayLabel =
+          lane.label ||
+          (isPassLane ? `Pass ${++passCounter}` : `Coverage ${index + 1}`);
 
         return (
           <div
@@ -396,7 +457,7 @@ export function PatternOverlay({
                 onMouseLeave={() => setHoveredLane(null)}
               >
                 <span className="pass-number">
-                  {lane.label || `Pass ${index + 1}`}
+                  {displayLabel}
                 </span>
                 <div
                   className={`direction-arrow ${

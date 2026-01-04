@@ -2,10 +2,11 @@
 
 import { Suspense, useMemo, useState } from 'react'
 import { CurlingSheet } from './CurlingSheet'
-import { PatternSelector } from './PatternSelector'
+import { PatternSelector, ActiveHighlight } from './PatternSelector'
 import { HeatmapOverlay } from './HeatmapOverlay'
 import { usePatternState } from '../hooks/usePatternState'
-import { getPatternLanes } from './PatternOverlay'
+import { getPassLanes } from './PatternOverlay'
+import { ANGLED_BLADE_DEG, INSIDE_OFFSET_FT } from '../lib/calibrations'
 
 function CurlingVisualizerInner() {
   const {
@@ -18,18 +19,30 @@ function CurlingVisualizerInner() {
     canAddMore,
     maxListSize,
   } = usePatternState()
-  const [activePass, setActivePass] = useState<{ entryIndex: number; passIndex: number } | null>(null)
+  const [activeHighlight, setActiveHighlight] = useState<ActiveHighlight | null>(null)
 
   const maxPassCounts = useMemo(() => {
-    return scrapeList.map((entry) => getPatternLanes(entry.patternKey, 0, 0).length)
+    return scrapeList.map((entry) => {
+      const angleDeg = entry.angleOn ? ANGLED_BLADE_DEG : 0
+      const insideOffset = entry.inside ? INSIDE_OFFSET_FT : 0
+      return getPassLanes(entry.patternKey, angleDeg, insideOffset).length
+    })
   }, [scrapeList])
 
-  const handleSelectPass = (entryIndex: number, passIndex: number) => {
-    setActivePass((prev) => {
-      if (prev?.entryIndex === entryIndex && prev?.passIndex === passIndex) {
+  const handleSelectHighlight = (selection: ActiveHighlight) => {
+    setActiveHighlight((prev) => {
+      if (
+        prev &&
+        prev.entryIndex === selection.entryIndex &&
+        prev.mode === selection.mode &&
+        ((prev.mode === 'pass' && selection.mode === 'pass' && prev.passIndex === selection.passIndex) ||
+          (prev.mode === 'group' &&
+            selection.mode === 'group' &&
+            prev.groupId === selection.groupId))
+      ) {
         return null
       }
-      return { entryIndex, passIndex }
+      return selection
     })
   }
 
@@ -45,15 +58,15 @@ function CurlingVisualizerInner() {
           onClearAll={clearAll}
           canAddMore={canAddMore}
           maxListSize={maxListSize}
-          onSelectPass={handleSelectPass}
-          activePass={activePass}
+          onSelectHighlight={handleSelectHighlight}
+          activeHighlight={activeHighlight}
           passCounts={maxPassCounts}
         />
       </div>
 
       <div className="sheet-wrapper">
         <CurlingSheet>
-          <HeatmapOverlay scrapeList={scrapeList} activePass={activePass} />
+          <HeatmapOverlay scrapeList={scrapeList} activeHighlight={activeHighlight} />
         </CurlingSheet>
       </div>
     </>
